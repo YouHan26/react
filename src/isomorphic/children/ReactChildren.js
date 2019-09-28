@@ -9,6 +9,13 @@
 
 'use strict';
 
+/**
+ * ReactChildren
+ * 提供 React的几个静态方法
+ * 内部实现一个带计数能力的基础的遍历函数
+ * children支持： array, iterator, 咱不支持 其他collection
+ */
+
 var ReactElement = require('ReactElement');
 
 var emptyFunction = require('fbjs/lib/emptyFunction');

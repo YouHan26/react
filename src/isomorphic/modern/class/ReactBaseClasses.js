@@ -54,7 +54,16 @@ ReactComponent.prototype.isReactComponent = {};
  * @final
  * @protected
  */
+/**
+ * 翻译一下就是：
+ * this.setState
+ * 可能是同步的，也可能是异步的
+ * 多次执行不能保证this.state的值是新的
+ * 如果需要最新的，使用callback方式, 但是callback的值也可能和 this.state不同
+ * 至于具体时机，具体方法，这里留个 TODO:
+ */
 ReactComponent.prototype.setState = function(partialState, callback) {
+  // 支持传入函数
   invariant(
     typeof partialState === 'object' ||
       typeof partialState === 'function' ||
@@ -134,6 +143,10 @@ function ReactPureComponent(props, context, updater) {
   this.updater = updater || ReactNoopUpdateQueue;
 }
 
+/**
+ * ReactPureComponent 与 ReactComponent的区别
+ * 原型多了个 isPureReactComponent = true
+ */
 function ComponentDummy() {}
 ComponentDummy.prototype = ReactComponent.prototype;
 var pureComponentPrototype = (ReactPureComponent.prototype = new ComponentDummy());

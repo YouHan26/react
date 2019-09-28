@@ -10,6 +10,14 @@
 
 'use strict';
 
+/**
+ * ReactCurrentOwner
+ * 同之前，作为保存当前建立构造函数的上下文对象
+ * 有三类： ReactInstance
+ *          Fiber
+ *          null
+ */
+
 import type {ReactInstance} from 'ReactInstanceType';
 import type {Fiber} from 'ReactFiber';
 

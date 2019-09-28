@@ -9,4 +9,10 @@
 
 'use strict';
 
+/**
+ * 记录React版本
+ * 因此，可以推断，react版本发布亦需要手动改代码版本
+ * @type {string}
+ */
+
 module.exports = '16.0.0';

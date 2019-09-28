@@ -30,6 +30,14 @@ function warnNoop(publicInstance, callerName) {
 }
 
 /**
+ * ReactNoopUpdateQueue
+ * 空的updater，默认updater
+ * 也可理解为interface类型的updater
+ * 具有以下几个方法：
+ *  isMounted： 检查composite component 是否挂载
+ */
+
+/**
  * This is the abstract API for an update queue.
  */
 var ReactNoopUpdateQueue = {

@@ -9,6 +9,12 @@
 
 'use strict';
 
+/**
+ * ReactElement
+ * 总体上是一个ReactElement的基础构造函数，
+ * 和0.3版本的变化就是不再使用 oo中的集成来生成
+ */
+
 var ReactCurrentOwner = require('ReactCurrentOwner');
 var hasOwnProperty = Object.prototype.hasOwnProperty;
 
@@ -120,6 +126,7 @@ function defineRefPropWarningGetter(props, displayName) {
 var ReactElement = function(type, key, ref, self, source, owner, props) {
   var element = {
     // This tag allow us to uniquely identify this as a React Element
+    // 唯一标示用来判断是不是react元素
     $$typeof: REACT_ELEMENT_TYPE,
 
     // Built-in properties that belong on the element
@@ -177,6 +184,8 @@ var ReactElement = function(type, key, ref, self, source, owner, props) {
  * Create and return a new ReactElement of the given type.
  * See https://facebook.github.io/react/docs/react-api.html#createelement
  */
+// 等同于 jsx： <h1 test="11">test</h1>
+// ReactElement.createElement('h1', {test: '11'}, 'test')
 ReactElement.createElement = function(type, config, children) {
   var propName;
 
@@ -200,6 +209,8 @@ ReactElement.createElement = function(type, config, children) {
     source = config.__source === undefined ? null : config.__source;
     // Remaining properties are added to a new props object
     for (propName in config) {
+      // 这里排除 key , ref
+      // $$type 会被复制
       if (
         hasOwnProperty.call(config, propName) &&
         !RESERVED_PROPS.hasOwnProperty(propName)
@@ -211,10 +222,12 @@ ReactElement.createElement = function(type, config, children) {
 
   // Children can be more than one argument, and those are transferred onto
   // the newly allocated props object.
+  // 可以接受多个child，自动合并数组
   var childrenLength = arguments.length - 2;
   if (childrenLength === 1) {
     props.children = children;
   } else if (childrenLength > 1) {
+    // 设定数组大小，内存优化
     var childArray = Array(childrenLength);
     for (var i = 0; i < childrenLength; i++) {
       childArray[i] = arguments[i + 2];
@@ -228,9 +241,12 @@ ReactElement.createElement = function(type, config, children) {
   }
 
   // Resolve default props
+  //  在ReactElement的时候就会添加 defaultProps的值
   if (type && type.defaultProps) {
     var defaultProps = type.defaultProps;
     for (propName in defaultProps) {
+      // 只有当当前字段的值为undefined的时候，才会使用defaultProps的值。
+      // 因此如果值为null， 不生效
       if (props[propName] === undefined) {
         props[propName] = defaultProps[propName];
       }
@@ -269,6 +285,7 @@ ReactElement.createElement = function(type, config, children) {
  * Return a function that produces ReactElements of a given type.
  * See https://facebook.github.io/react/docs/react-api.html#createfactory
  */
+// createElement 的curry函数
 ReactElement.createFactory = function(type) {
   var factory = ReactElement.createElement.bind(null, type);
   // Expose the type on the factory and the prototype so that it can be
@@ -280,6 +297,7 @@ ReactElement.createFactory = function(type) {
   return factory;
 };
 
+// 替换原有element的key
 ReactElement.cloneAndReplaceKey = function(oldElement, newKey) {
   var newElement = ReactElement(
     oldElement.type,
@@ -289,7 +307,7 @@ ReactElement.cloneAndReplaceKey = function(oldElement, newKey) {
     oldElement._source,
     oldElement._owner,
     oldElement.props,
-  );
+);
 
   return newElement;
 };
@@ -302,6 +320,7 @@ ReactElement.cloneElement = function(element, config, children) {
   var propName;
 
   // Original props are copied
+  // 前拷贝
   var props = Object.assign({}, element.props);
 
   // Reserved names are extracted
@@ -320,6 +339,9 @@ ReactElement.cloneElement = function(element, config, children) {
   if (config != null) {
     if (hasValidRef(config)) {
       // Silently steal the ref from the parent.
+      // ref和当前的owner是绑定的，所以如果有新的ref，
+      // 也就是说current owner发生了变化
+      // 也需要同步更新下owner
       ref = config.ref;
       owner = ReactCurrentOwner.current;
     }
@@ -337,6 +359,7 @@ ReactElement.cloneElement = function(element, config, children) {
         hasOwnProperty.call(config, propName) &&
         !RESERVED_PROPS.hasOwnProperty(propName)
       ) {
+        // 如果config中的有新的属性，则使用defaultProps更新下
         if (config[propName] === undefined && defaultProps !== undefined) {
           // Resolve default props
           props[propName] = defaultProps[propName];
